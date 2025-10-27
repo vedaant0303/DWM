@@ -1,0 +1,87 @@
+CREATE TABLE Fact_Treatment (
+    Treatment_fa_ID INT PRIMARY KEY,
+    Date_ID INT,
+    Doctor_ID INT,
+    Hosp_ID INT,
+    Treatment_ID INT,
+    Patient_ID INT,
+    Duration INT,
+    Cost DECIMAL(10, 2)
+    );
+
+CREATE TABLE Patient_Dim (
+    Patient_ID INT PRIMARY KEY,
+    Patient_Name VARCHAR(100),
+    Gender CHAR(1),
+    Age INT,
+    City_ID INT
+);
+
+
+INSERT INTO Fact_Treatment (Treatment_fa_ID, Date_ID, Doctor_ID, Hosp_ID, Treatment_ID, Patient_ID, Duration, Cost) VALUES
+(1001, 20250101, 201, 301, 401, 1, 45, 500.00),
+(1002, 20250102, 202, 302, 402, 2, 30, 300.00),
+(1003, 20250103, 203, 303, 403, 3, 60, 750.00);
+
+
+INSERT INTO Patient_Dim (Patient_ID, Patient_Name, Gender, Age, City_ID) VALUES
+(1, 'Alice Johnson', 'F', 29, 101),
+(2, 'Bob Smith', 'M', 45, 102),
+(3, 'Charlie Lee', 'M', 37, 103);
+
+--Roll up
+SELECT 
+    p.Gender,
+    COUNT(f.Treatment_fa_ID) AS NumberOfTreatments,
+    SUM(f.Cost) AS TotalCost,
+    AVG(f.Duration) AS AvgDuration
+FROM Fact_Treatment f
+JOIN Patient_Dim p ON f.Patient_ID = p.Patient_ID
+GROUP BY p.Gender;
+
+--Drill down
+SELECT 
+    p.Patient_Name,
+    p.Gender,
+    COUNT(f.Treatment_fa_ID) AS NumberOfTreatments,
+    SUM(f.Cost) AS TotalCost,
+    AVG(f.Duration) AS AvgDuration
+FROM Fact_Treatment f
+JOIN Patient_Dim p ON f.Patient_ID = p.Patient_ID
+GROUP BY p.Patient_Name, p.Gender
+ORDER BY p.Patient_Name;
+
+--Slice
+SELECT 
+    f.Treatment_fa_ID,
+    f.Date_ID,
+    f.Doctor_ID,
+    f.Hosp_ID,
+    f.Treatment_ID,
+    p.Patient_Name,
+    f.Duration,
+    f.Cost
+FROM Fact_Treatment f
+JOIN Patient_Dim p ON f.Patient_ID = p.Patient_ID
+WHERE p.Gender = 'F';
+
+--Dice
+SELECT 
+    f.Treatment_fa_ID,
+    p.Patient_Name,
+    p.Age,
+    f.Duration,
+    f.Cost
+FROM Fact_Treatment f
+JOIN Patient_Dim p ON f.Patient_ID = p.Patient_ID
+WHERE p.Gender = 'F' AND p.Age < 35;
+
+--Pivot
+SELECT 
+    p.Gender,
+    SUM(CASE WHEN p.Age < 30 THEN f.Cost ELSE 0 END) AS Cost_Under_30,
+    SUM(CASE WHEN p.Age BETWEEN 30 AND 40 THEN f.Cost ELSE 0 END) AS Cost_30_to_40,
+    SUM(CASE WHEN p.Age > 40 THEN f.Cost ELSE 0 END) AS Cost_Above_40
+FROM Fact_Treatment f
+JOIN Patient_Dim p ON f.Patient_ID = p.Patient_ID
+GROUP BY p.Gender;

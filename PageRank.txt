@@ -1,0 +1,23 @@
+import numpy as np
+def page_rank(matrix,d=0.85,max_iter=100):
+    n=len(matrix)
+    rank=np.ones(n)/n
+    out_degree=np.sum(matrix,axis=1)
+    for _ in range(max_iter):
+        new_rank=np.ones(n)*(1-d)/n
+        for i in range(n):
+            for j in range(n):
+                if matrix[j][i]==1:
+                    new_rank[i]+=d*rank[j]/out_degree[j]
+        if np.allclose(rank,new_rank): break
+        rank=new_rank
+    return rank
+n=int(input("Enter number of pages: "))
+pages=input(f"Enter {n} page names separated by space: ").split()
+matrix=[]
+print("Enter adjacency matrix row by row (0 or 1, space separated):")
+for _ in range(n): matrix.append(list(map(int,input().split())))
+adj_matrix=np.array(matrix)
+ranks=page_rank(adj_matrix)
+print("\nPageRank Scores:")
+for i,p in enumerate(pages): print(f"{p}: {round(ranks[i],4)}")

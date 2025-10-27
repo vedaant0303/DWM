@@ -1,0 +1,20 @@
+import pandas as pd
+data = {
+    "Color": ["Red","Red","Red","Yellow","Yellow","Yellow","Yellow","Yellow","Red","Red"],
+    "Type": ["Sports","Sports","Sports","Sports","Sports","SUV","SUV","SUV","SUV","Sports"],
+    "Origin": ["Domestic","Domestic","Domestic","Domestic","Imported","Imported","Imported","Domestic","Imported","Imported"],
+    "Stolen": ["Yes","No","Yes","No","Yes","No","Yes","No","No","Yes"]
+}
+df = pd.DataFrame(data)
+P_yes = (df["Stolen"]=="Yes").mean()
+P_no = (df["Stolen"]=="No").mean()
+def prob(f,v,t):
+    s=df[df["Stolen"]==t]
+    return (s[f]==v).mean()
+c=input("Color (Red/Yellow): ").capitalize()
+t=input("Type (Sports/SUV): ").capitalize()
+o=input("Origin (Domestic/Imported): ").capitalize()
+P_yes*=prob("Color",c,"Yes")*prob("Type",t,"Yes")*prob("Origin",o,"Yes")
+P_no*=prob("Color",c,"No")*prob("Type",t,"No")*prob("Origin",o,"No")
+print("\nP(Yes)=",round(P_yes,6)," P(No)=",round(P_no,6))
+print("Prediction:","STOLEN" if P_yes>P_no else "NOT STOLEN")

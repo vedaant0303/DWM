@@ -1,0 +1,17 @@
+import numpy as np
+def k_means(data,k,max_iter=100):
+    centers=np.random.choice(data,k,replace=False)
+    for _ in range(max_iter):
+        clusters=[[] for _ in range(k)]
+        for point in data:
+            nearest=np.argmin([abs(point-c) for c in centers])
+            clusters[nearest].append(point)
+        new_centers=np.array([np.mean(c) if c else centers[i] for i,c in enumerate(clusters)])
+        if np.all(centers==new_centers): break
+        centers=new_centers
+    return clusters,centers
+data=np.array(list(map(int,input("Enter numbers separated by space: ").split())))
+k=int(input("Enter number of clusters (k): "))
+clusters,centers=k_means(data,k)
+for i,c in enumerate(clusters): print(f"Cluster {i+1}: {c}")
+print("Final Centers:",centers)

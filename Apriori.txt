@@ -1,0 +1,28 @@
+from itertools import combinations
+
+def get_support(itemset, transactions):
+    return sum(1 for t in transactions if itemset.issubset(t)) / len(transactions)
+
+def apriori(transactions, min_support):
+    items = sorted(set().union(*transactions))
+    current = [frozenset([i]) for i in items]
+    freq = []
+    while current:
+        valid = []
+        for it in current:
+            sup = get_support(it, transactions)
+            if sup >= min_support:
+                freq.append((set(it), round(sup, 2)))
+                valid.append(it)
+        next_sets = [a | b for i, a in enumerate(valid) for b in valid[i+1:] if len(a | b) == len(a)+1]
+        current = list(set(next_sets))
+    return freq
+
+n = int(input("Enter number of transactions: "))
+transactions = [set(input(f"Transaction {i+1}: ").title().split(",")) for i in range(n)]
+min_support = float(input("Enter minimum support (e.g. 0.3): "))
+results = apriori(transactions, min_support)
+
+print("\nFrequent Itemsets and Support:\n")
+for items, support in results:
+    print(f"{items} -> {support}")
